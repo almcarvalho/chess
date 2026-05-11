@@ -23,6 +23,8 @@ TOP_SAMPLE_COUNT = 4
 OCCUPIED_EDGE_THRESHOLD = 0.075
 OCCUPIED_CENTER_DIFF_THRESHOLD = 22.0
 EMPTY_MATCH_THRESHOLD = 0.62
+EMPTY_REJECT_THRESHOLD = 0.78
+EMPTY_OVER_PIECE_MARGIN = 0.08
 EXPORT_SCAN_DELAY_MS = 450
 
 
@@ -464,6 +466,8 @@ class ChessPieceReader:
 
 
 def identify_piece(crop: np.ndarray) -> tuple[str | None, float]:
+    empty_name, empty_score = identify_empty_square(crop)
+
     samples = [path for path in PIECES_DIR.glob("*/*.png") if path.parent.name not in EMPTY_CLASSES]
     if not samples:
         return None, 0.0
@@ -497,6 +501,8 @@ def identify_piece(crop: np.ndarray) -> tuple[str | None, float]:
     if best_score < threshold_for_class(sample_count):
         return None, max(0.0, best_score)
     if len(class_scores) > 1 and margin < UNKNOWN_MARGIN and best_score < 0.70:
+        return None, max(0.0, best_score)
+    if empty_name is not None and empty_score >= EMPTY_REJECT_THRESHOLD and empty_score > best_score + EMPTY_OVER_PIECE_MARGIN:
         return None, max(0.0, best_score)
     return best_name, best_score
 
@@ -559,6 +565,10 @@ def is_square_occupied(crop: np.ndarray) -> tuple[bool, float]:
     if empty_name is not None:
         return False, max(0.0, 1.0 - empty_score)
 
+    return measure_visual_occupancy(crop)
+
+
+def measure_visual_occupancy(crop: np.ndarray) -> tuple[bool, float]:
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, (96, 96), interpolation=cv2.INTER_AREA)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
