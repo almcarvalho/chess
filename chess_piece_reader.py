@@ -24,7 +24,7 @@ OCCUPIED_EDGE_THRESHOLD = 0.075
 OCCUPIED_CENTER_DIFF_THRESHOLD = 22.0
 EMPTY_MATCH_THRESHOLD = 0.62
 EMPTY_REJECT_THRESHOLD = 0.78
-EMPTY_OVER_PIECE_MARGIN = 0.08
+EMPTY_OVER_PIECE_MARGIN = 0.20
 EXPORT_SCAN_DELAY_MS = 450
 
 
@@ -628,6 +628,7 @@ def make_empty_features(image: np.ndarray) -> np.ndarray:
 
 
 def make_match_features(image: np.ndarray) -> dict[str, np.ndarray]:
+    resized = cv2.resize(image, (72, 72), interpolation=cv2.INTER_AREA)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, (72, 72), interpolation=cv2.INTER_AREA)
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
@@ -635,12 +636,14 @@ def make_match_features(image: np.ndarray) -> dict[str, np.ndarray]:
     edges = cv2.Canny(normalized, 30, 100)
     mask = make_piece_mask(gray)
     hu = make_hu_features(mask)
+    color = make_color_features(resized, mask)
 
     return {
         "gray": normalized.astype(np.float32),
         "edges": edges.astype(np.float32),
         "mask": mask.astype(np.float32),
         "hu": hu.astype(np.float32),
+        "color": color.astype(np.float32),
     }
 
 
@@ -672,14 +675,31 @@ def make_hu_features(mask: np.ndarray) -> np.ndarray:
     return -np.sign(hu) * np.log10(np.abs(hu) + 1e-12)
 
 
+def make_color_features(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB).astype(np.float32)
+    usable_mask = mask > 0
+    if int(np.count_nonzero(usable_mask)) < 80:
+        size = mask.shape[0]
+        margin = int(size * 0.22)
+        usable_mask = np.zeros_like(mask, dtype=bool)
+        usable_mask[margin : size - margin, margin : size - margin] = True
+
+    pixels = lab[usable_mask]
+    mean = pixels.mean(axis=0)
+    std = pixels.std(axis=0)
+    return np.concatenate([mean / 255.0, std / 128.0])
+
+
 def compare_piece_images(a: dict[str, np.ndarray], b: dict[str, np.ndarray]) -> float:
     gray_score = compare_signatures(a["gray"].copy(), b["gray"].copy())
     edge_score = compare_signatures(a["edges"].copy(), b["edges"].copy())
     mask_score = compare_signatures(a["mask"].copy(), b["mask"].copy())
     hu_distance = float(np.linalg.norm(a["hu"] - b["hu"]))
     hu_score = 1.0 / (1.0 + hu_distance)
+    color_distance = float(np.linalg.norm(a["color"] - b["color"]))
+    color_score = 1.0 / (1.0 + color_distance * 3.0)
 
-    return (gray_score * 0.38) + (edge_score * 0.22) + (mask_score * 0.28) + (hu_score * 0.12)
+    return (gray_score * 0.30) + (edge_score * 0.18) + (mask_score * 0.24) + (hu_score * 0.10) + (color_score * 0.18)
 
 
 def make_signature(image: np.ndarray) -> np.ndarray:
