@@ -1,0 +1,34 @@
+{
+  "a1=peao_branco|a3=peao_cinza|b4=peao_cinza|c1=peao_branco|c3=peao_cinza|c5=peao_branco|d6=peao_cinza|e3=peao_branco|f2=peao_cinza|g7=peao_cinza|h6=peao_cinza|h8=peao_cinza": [
+    [
+      "f2",
+      "d4",
+      "b6"
+    ]
+  ],
+  "a1=peao_branco|a3=peao_cinza|c1=peao_branco|c3=peao_cinza|d6=peao_cinza|e2=peao_branco|e3=peao_branco|f2=peao_cinza|h6=peao_cinza|h8=peao_cinza": [
+    [
+      "f2",
+      "d4"
+    ]
+  ],
+  "a1=peao_branco|a7=peao_cinza|b2=peao_cinza|c1=peao_branco|c3=peao_branco|d6=peao_cinza|d8=peao_cinza|e3=peao_branco|e7=peao_cinza|f1=peao_branco|h8=peao_cinza": [
+    [
+      "b2",
+      "d4",
+      "f2"
+    ]
+  ],
+  "a1=peao_branco|b2=peao_cinza|b4=peao_cinza|b7=peao_branco|c1=peao_branco|c3=peao_cinza|d6=peao_cinza|e3=peao_branco|f2=peao_cinza|g7=peao_cinza|h3=peao_cinza": [
+    [
+      "f2",
+      "d4"
+    ]
+  ],
+  "a1=peao_cinza|a3=peao_cinza|b2=peao_branco|b4=peao_cinza|c1=peao_branco|d6=peao_cinza|e2=peao_branco|g7=peao_cinza|h7=peao_cinza": [
+    [
+      "a1",
+      "c3"
+    ]
+  ]
+}

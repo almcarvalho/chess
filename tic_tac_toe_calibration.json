@@ -1,0 +1,27 @@
+{
+  "corner_points": [
+    [
+      195,
+      405
+    ],
+    [
+      451,
+      413
+    ],
+    [
+      473,
+      41
+    ],
+    [
+      202,
+      36
+    ]
+  ],
+  "order": [
+    "inferior_esquerdo",
+    "inferior_direito",
+    "superior_direito",
+    "superior_esquerdo"
+  ],
+  "warp_size": 420
+}
